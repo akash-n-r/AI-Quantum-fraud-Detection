@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            margin: auto;
+        }
+        input, select, button {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            display: block;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .switch {
+            color: blue;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Page -->
+    <div class="container" id="loginPage">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Enter your username">
+        <input type="password" id="password" placeholder="Enter your password">
+        <button onclick="login()">Login</button>
+        <p id="loginMessage" class="result"></p>
+        <p class="switch" onclick="showRegister()">Don't have an account? Create Account</p>
+    </div>
+
+    <!-- Registration Page -->
+    <div class="container hidden" id="registerPage">
+        <h2>Create Account</h2>
+        <input type="text" id="newUsername" placeholder="Enter a username">
+        <input type="password" id="newPassword" placeholder="Enter a password">
+        <button onclick="register()">Register</button>
+        <p id="registerMessage" class="result"></p>
+        <p class="switch" onclick="showLogin()">Already have an account? Login</p>
+    </div>
+
+    <!-- Fraud Detection Page -->
+    <div class="container hidden" id="fraudPage">
+        <h2>Fraud Detection System</h2>
+
+        <label>Amount:</label>
+        <input type="number" id="amount" placeholder="Enter amount">
+
+        <label>Location:</label>
+        <select id="location">
+            <option value="USA">USA</option>
+            <option value="India">India</option>
+            <option value="UK">UK</option>
+            <option value="Nigeria">Nigeria</option>
+            <option value="China">China</option>
+        </select>
+
+        <label>Card Type:</label>
+        <select id="cardType">
+            <option value="Visa">Visa</option>
+            <option value="MasterCard">MasterCard</option>
+            <option value="Amex">Amex</option>
+            <option value="Discover">Discover</option>
+        </select>
+
+        <label>Card Name:</label>
+        <input type="text" id="cardName" placeholder="Enter cardholder name">
+
+        <button onclick="checkFraud()">Check Fraud</button>
+
+        <p class="result" id="result"></p>
+
+        <h3>Transaction Report</h3>
+        <p id="report"></p>
+    </div>
+
+    <script>
+        // Predefined User Credentials
+        let users = [{ username: "Akash", password: "Test" }];
+
+        function showRegister() {
+            document.getElementById("loginPage").classList.add("hidden");
+            document.getElementById("registerPage").classList.remove("hidden");
+        }
+
+        function showLogin() {
+            document.getElementById("registerPage").classList.add("hidden");
+            document.getElementById("loginPage").classList.remove("hidden");
+        }
+
+        function register() {
+            let newUsername = document.getElementById("newUsername").value.trim();
+            let newPassword = document.getElementById("newPassword").value.trim();
+
+            if (newUsername && newPassword) {
+                users.push({ username: newUsername, password: newPassword });
+                document.getElementById("registerMessage").innerHTML = "✅ Registration Successful! Please login.";
+                document.getElementById("registerMessage").style.color = "green";
+                setTimeout(() => {
+                    showLogin();
+                }, 1500);
+            } else {
+                document.getElementById("registerMessage").innerHTML = "⚠ Please enter valid details.";
+                document.getElementById("registerMessage").style.color = "red";
+            }
+        }
+
+        function login() {
+            let username = document.getElementById("username").value.trim();
+            let password = document.getElementById("password").value.trim();
+
+            let validUser = users.some(user => user.username === username && user.password === password);
+
+            if (validUser) {
+                document.getElementById("loginMessage").innerHTML = "✅ Login Successful!";
+                document.getElementById("loginMessage").style.color = "green";
+                setTimeout(() => {
+                    document.getElementById("loginPage").classList.add("hidden");
+                    document.getElementById("fraudPage").classList.remove("hidden");
+                }, 1000);
+            } else {
+                document.getElementById("loginMessage").innerHTML = "❌ Invalid username or password!";
+                document.getElementById("loginMessage").style.color = "red";
+            }
+        }
+
+        // Predefined Fraud Data
+        const fraudDatabase = [
+            { amount: 5000, location: "Nigeria", cardType: "Visa" },
+            { amount: 2000, location: "China", cardType: "MasterCard" },
+            { amount: 7000, location: "USA", cardType: "Amex" },
+            { amount: 1500, location: "India", cardType: "Discover" }
+        ];
+
+        function checkFraud() {
+            const amount = parseInt(document.getElementById("amount").value);
+            const location = document.getElementById("location").value;
+            const cardType = document.getElementById("cardType").value;
+            const cardName = document.getElementById("cardName").value.trim();
+
+            if (!amount || !cardName) {
+                document.getElementById("result").innerHTML = "⚠ Please fill all fields.";
+                document.getElementById("result").style.color = "red";
+                return;
+            }
+
+            const isFraud = fraudDatabase.some(data => 
+                data.amount === amount && data.location === location && data.cardType === cardType
+            );
+
+            let report = `Transaction Amount: ${amount}<br>Location: ${location}<br>Card Type: ${cardType}`;
+
+            if (isFraud) {
+                document.getElementById("result").innerHTML = "🚨 Fraud Detected!";
+                document.getElementById("result").style.color = "red";
+                report += "<br>Status: 🚨 Fraud Detected!";
+            } else {
+                document.getElementById("result").innerHTML = "✅ Safe Transaction";
+                document.getElementById("result").style.color = "green";
+                report += "<br>Status: ✅ Safe Transaction";
+            }
+
+            document.getElementById("report").innerHTML = report;
+        }
+    </script>
+
+</body>
+</html>
